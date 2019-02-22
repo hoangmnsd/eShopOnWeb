@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/hoangmnsd/eshoponweb:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/hoangmnsd/eshoponweb:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: eshoponweb
+        chartPath: charts/eshoponweb
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/hoangmnsd/eshoponweb'
+          image.tag: '{{.DIGEST_HEX}}'
